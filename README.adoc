@@ -1,0 +1,11 @@
+# TNT Badges sticker
+
+Simple tasks to generate sticker sheets for badges
+
+## Typical workflow
+ * grab csv from HelloAsso
+ * copy it into source folder, renaming it to attendees.csv
+ * `npm run csvtojson`
+ * `npm run generate`
+ * `open out/index.html`
+ * print to PDF
