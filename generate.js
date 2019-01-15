@@ -1,6 +1,8 @@
-var QRCode = require('qrcode');
+require('babel-polyfill');
+var brandedQRCode = require('branded-qr-code');
 var asciidoctor = require('asciidoctor.js')();
 var fs = require('fs');
+var path = require('path');
 
 if (!fs.existsSync('out')){
     fs.mkdir('out');
@@ -24,16 +26,21 @@ for (attendee of attendees){
     let email = attendee["Champ additionnel: Email"];
 
 
-
-    QRCode.toFile(`./out/${number}.png`, 
-            `${name} ${firstName}|${company}|${email}`, 
-            { margin: 0
-    /*      color: {
-                dark: '#00F', // Blue modules
-                light: '#0000' // Transparent background
-            }*/
-    }, function (err) {
-    let content = `
+    const logoPath = path.resolve(__dirname, `./tnt-logo.png`);
+    const dst = path.resolve(__dirname, `./out/${number}.png`);
+        brandedQRCode.generate({
+            text: `${name} ${firstName}|${company}|${email}`,
+            path: logoPath,
+            ratio: 2,
+            opt: { errorCorrectionLevel: 'Q', margin: 0 },
+        })
+        .then((buf) => {
+            fs.writeFile(dst, buf, (err) => {
+                if (err) {
+                    throw err
+                }
+            });
+            let content = `
 [grid="none", frame="none",cols="6,2,1"]
 |===
 a|**${firstName}**
@@ -46,11 +53,12 @@ ${company}
 |===
     `;
     fs.writeFileSync(`./out/${number}.adoc`, content)
-})
-includeContent += `
+});
+    includeContent += `
 include::out/${number}.adoc[]
-`
+`;
 }
+    
 // Layout for Avery L4737REV-25 27 per page
 var html = `
 <meta charset="utf-8" /> 
@@ -118,11 +126,9 @@ table td:nth-of-type(3) p em{
     writing-mode: initial;
     position: absolute;
     bottom: 0.25cm;
-    right: 0;
+    right: 0.65cm;
     font-style: normal;
     font-size: .5em;
-    width: 0.8cm;
-    text-align: center;
 }
 </style>
 ` + asciidoctor.convert(includeContent, {safe: 'server', attributes: {showtitle: true, icons: 'font'}});
