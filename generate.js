@@ -12,10 +12,10 @@ const capitalize = (s) => {
     if (typeof s !== 'string') return ''
     return s.toLowerCase()
     .split(' ')
-    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .map((s) => s.split('-').map((e) => e.charAt(0).toUpperCase() + e.substring(1)).join('-'))
     .join(' ');
   }
-var type = ""
+
 var attendees = require("./attendees.json");
 var includeContent = "";
 for (attendee of attendees){
@@ -24,6 +24,7 @@ for (attendee of attendees){
     let firstName = capitalize(attendee["Prénom"]);
     let company = attendee["Société"];
     let email = attendee["Champ additionnel: Email"];
+    let type = attendee["Type"];
 
 
     const logoPath = path.resolve(__dirname, `./tnt-logo.png`);
@@ -32,10 +33,10 @@ for (attendee of attendees){
             text: `${name} ${firstName}|${company}|${email}`,
             path: logoPath,
             ratio: 2,
-            opt: { errorCorrectionLevel: 'Q', margin: 0 },
+            opt: { errorCorrectionLevel: 'H', margin: 0 },
         })
         .then((buf) => {
-            fs.writeFile(dst, buf, (err) => {
+            fs.writeFileSync(dst, buf, (err) => {
                 if (err) {
                     throw err
                 }
@@ -67,7 +68,7 @@ var html = `
 @media print{
     @page {
         size: 210mm 297mm;
-        margin: 1.33cm 0.1cm 1.52cm 0.55cm;
+        margin: 1.6cm 0.1cm 1.3cm 0.55cm;
     }
     table{
         page-break-inside: avoid !important;
@@ -76,6 +77,10 @@ var html = `
     }
     table:nth-of-type(27n){
         page-break-after: always !important;
+    }
+    body{
+        margin:0;
+        padding:0;
     }
 }
 body{
