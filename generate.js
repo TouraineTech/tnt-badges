@@ -19,18 +19,18 @@ const capitalize = (s) => {
 var attendees = require("./attendees.json");
 var includeContent = "";
 for (attendee of attendees){
-    let number = attendee["Numéro"];
+    let number = attendee["N° de commande"];
     let name = attendee["Nom"].toUpperCase();
     let firstName = capitalize(attendee["Prénom"]);
-    let company = attendee["Société"];
-    let email = attendee["Champ additionnel: Email"];
-    let type = attendee["Type"];
+    let company = attendee["Nom de l'entreprise"] || '';
+    let email = attendee["E-mail"];
+    let school = attendee["Ecole"] || '';
 
 
-    const logoPath = path.resolve(__dirname, `./tnt-logo.png`);
+    const logoPath = path.resolve(__dirname, `./empty.png`);
     const dst = path.resolve(__dirname, `./out/${number}.png`);
         brandedQRCode.generate({
-            text: `${name} ${firstName}|${company}|${email}`,
+            text: `${name} ${firstName} <${email}>`,
             path: logoPath,
             ratio: 2,
             opt: { errorCorrectionLevel: 'H', margin: 0 },
@@ -48,9 +48,9 @@ a|**${firstName}**
 
 ${name} 
 
-${company}
+${company}${school}
 | image:${number}.png[] 
-| ${type} __${number}__
+|
 |===
     `;
     fs.writeFileSync(`./out/${number}.adoc`, content)
